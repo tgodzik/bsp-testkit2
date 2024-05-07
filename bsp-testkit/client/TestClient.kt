@@ -3,6 +3,8 @@ package org.jetbrains.bsp.testkit.client
 import ch.epfl.scala.bsp4j.BuildClient
 import ch.epfl.scala.bsp4j.BuildServer
 import ch.epfl.scala.bsp4j.BuildServerCapabilities
+import ch.epfl.scala.bsp4j.CleanCacheParams
+import ch.epfl.scala.bsp4j.CleanCacheResult
 import ch.epfl.scala.bsp4j.CompileParams
 import ch.epfl.scala.bsp4j.CompileResult
 import ch.epfl.scala.bsp4j.CppOptionsParams
@@ -159,6 +161,13 @@ class TestClient(
       expectedDiagnostics.zip(session.client.publishDiagnosticsNotifications).forEach{
         assertJsonEquals(it.first, it.second)
       }
+      assertJsonEquals(expectedResult, result)
+    }
+  }
+  fun clearCache(timeout: Duration, params: CleanCacheParams, expectedResult: CleanCacheResult) {
+    val transformedParams = applyJsonTransform(params)
+    test(timeout) { session, _ ->
+      val result = session.server.buildTargetCleanCache(transformedParams).await()
       assertJsonEquals(expectedResult, result)
     }
   }
